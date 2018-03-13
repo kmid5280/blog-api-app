@@ -45,13 +45,14 @@ router.put('/:id', jsonParser, (req,res) => {
     return res.status(400).send(message);
   }
   console.log(`Updating blog \`${req.params.id}\``);
-  BlogPosts.update({
+  const updatedBlogPosts = BlogPosts.update({
     id: req.params.id,
     title: req.body.title,
     content: req.body.content,
     author: req.body.author,
     publishDate: req.body.publishDate    
 })
+  res.status(200).json(updatedBlogPosts)
 })
 
 module.exports = router;
