@@ -1,4 +1,6 @@
 const uuid = require('uuid');
+const mongoose = require('mongoose')
+mongoose.Promise = global.Promise;
 
 // This module provides volatile storage, using a `BlogPost`
 // model. We haven't learned about databases yet, so for now
@@ -66,5 +68,29 @@ function createBlogPostsModel() {
   return storage;
 }
 
+const blogPostSchema = mongoose.Schema({
+  title: {type: String, required: true},
+  content: {type: String, required: true},
+  author: {type: String, required: true},
+  //created: {type: String, required: true}
+})
+
+blogPostSchema.virtual('authorName').get(function() {
+  return `${this.author.firstName} ${this.author.lastName}`.trim();
+})
+
+blogPostSchema.methods.serialize = function() {
+  return {
+    id: this._id,
+    author: this.authorName,
+    content: this.content,
+    title: this.title,
+    //created: this.created
+  }
+}
+
+const BlogPost = mongoose.model('BlogPost', blogPostSchema)
+
 
 module.exports = {BlogPosts: createBlogPostsModel()};
+module.exports = {BlogPost}

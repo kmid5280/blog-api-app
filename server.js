@@ -54,12 +54,7 @@ if (require.main === module) {
 
 module.exports = {app, runServer, closeServer};
 
-const blogPostSchema = mongoose.Schema({
-  title: {type: String, required: true},
-  content: {type: String, required: true},
-  author: {type: String, required: true},
-  //created: {type: String, required: true}
-})
+
 
 app.get('/blog-posts', (req, res) => {
   BlogPost
@@ -113,13 +108,13 @@ app.post('/blogposts', (req, res) => {
 })
 
 app.put('/blogposts/:id', (req, res) => {
-  /*if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+  if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     const message = (
       `Request path id (${req.params.id}) and request body id ` +
       `(${req.body.id}) must match`);
       console.error(message);
       return res.status(400).json({message: message});
-    }*/
+    }
 
     const toUpdate = {};
     const updateableFields = ['title', 'content', 'author'];
@@ -134,7 +129,7 @@ app.put('/blogposts/:id', (req, res) => {
       .then(blogposts => res.status(204).end())
       .catch(err => res.status(500).json({message: 'internal server error'}))
     
-  }
+  })
 })
 
 app.delete('/blog-posts/:id', (req, res) => {
