@@ -5,58 +5,14 @@ const app = express();
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const {PORT, DATABASE_URL} = require('./config');
-const {Blog} = require('./models')
+const {BlogPost} = require('./models')
 
 app.use(morgan('common'));
 
 app.use(express.static('public'))
 app.use('/blog-posts', blogPostsRouter)
 
-let server;
-
-// this function starts our server and returns a Promise.
-// In our test code, we need a way of asynchronously starting
-// our server, since we'll be dealing with promises there.
-function runServer() {
-  const port = process.env.PORT || 8080;
-  return new Promise((resolve, reject) => {
-    server = app.listen(port, () => {
-      console.log(`Your app is listening on port ${port}`);
-      resolve(server);
-    }).on('error', err => {
-      reject(err)
-    });
-  });
-}
-
-// like `runServer`, this function also needs to return a promise.
-// `server.close` does not return a promise on its own, so we manually
-// create one.
-function closeServer() {
-  return new Promise((resolve, reject) => {
-    console.log('Closing server');
-    server.close(err => {
-      if (err) {
-        reject(err);
-        // so we don't also call `resolve()`
-        return;
-      }
-      resolve();
-    });
-  });
-}
-
-// if server.js is called directly (aka, with `node server.js`), this block
-// runs. but we also export the runServer command so other code (for instance, test code) can start the server as needed.
-if (require.main === module) {
-  runServer(DATABASE_URL).catch(err => console.error(err));
-};
-
-module.exports = {app, runServer, closeServer};
-
-
-
-app.get('/blog-posts', (req, res) => {
+/* app.get('/blog-posts', (req, res) => {
   BlogPost
     .find()
     .then(blogposts => {
@@ -83,8 +39,8 @@ app.get('/blog-posts/:id', (req, res) => {
     });
 });
 
-app.post('/blogposts', (req, res) => {
-  const requiredFields = ['title', 'content', 'author'/*: {'firstname', 'lastname'}*/ ];
+app.post('/blog-posts', (req, res) => {
+  const requiredFields = ['title', 'content', 'author'/*: {'firstname', 'lastname'} ];
   for (let i=0; i<requiredFields.length; i++) {
     
     if (!(field in req.body)) {
@@ -130,11 +86,57 @@ app.put('/blogposts/:id', (req, res) => {
       .catch(err => res.status(500).json({message: 'internal server error'}))
     
   })
-})
+
 
 app.delete('/blog-posts/:id', (req, res) => {
   BlogPost
   .findByIdAndRemove(req.params.id)
   .then(() => res.status(204).end())
   .catch(err => res.status(500).json({message: 'internal server error'}))
+})*/
+
+app.use('*', function (req, res) {
+  res.status(404).json({message: 'not found' })
 })
+
+let server;
+
+// this function starts our server and returns a Promise.
+// In our test code, we need a way of asynchronously starting
+// our server, since we'll be dealing with promises there.
+function runServer() {
+  const port = process.env.PORT || 8080;
+  return new Promise((resolve, reject) => {
+    server = app.listen(port, () => {
+      console.log(`Your app is listening on port ${port}`);
+      resolve(server);
+    }).on('error', err => {
+      reject(err)
+    });
+  });
+}
+
+// like `runServer`, this function also needs to return a promise.
+// `server.close` does not return a promise on its own, so we manually
+// create one.
+function closeServer() {
+  return new Promise((resolve, reject) => {
+    console.log('Closing server');
+    server.close(err => {
+      if (err) {
+        reject(err);
+        // so we don't also call `resolve()`
+        return;
+      }
+      resolve();
+    });
+  });
+}
+
+// if server.js is called directly (aka, with `node server.js`), this block
+// runs. but we also export the runServer command so other code (for instance, test code) can start the server as needed.
+if (require.main === module) {
+  runServer(DATABASE_URL).catch(err => console.error(err));
+};
+
+module.exports = {app, runServer, closeServer};

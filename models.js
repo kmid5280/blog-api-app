@@ -17,7 +17,7 @@ function StorageException(message) {
    this.name = "StorageException";
 }
 
-const BlogPosts = {
+/* const BlogPosts = {
   create: function(title, content, author, publishDate) {
     const post = {
       id: uuid.v4(),
@@ -66,7 +66,7 @@ function createBlogPostsModel() {
   const storage = Object.create(BlogPosts);
   storage.posts = [];
   return storage;
-}
+}*/
 
 const blogPostSchema = mongoose.Schema({
   title: {type: String, required: true},
@@ -91,6 +91,4 @@ blogPostSchema.methods.serialize = function() {
 
 const BlogPost = mongoose.model('BlogPost', blogPostSchema)
 
-
-module.exports = {BlogPosts: createBlogPostsModel()};
 module.exports = {BlogPost}

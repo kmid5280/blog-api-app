@@ -2,12 +2,22 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
-const {BlogPosts} = require('./models');
+const {BlogPost} = require('./models');
 
-BlogPosts.create('this is a title', 'this is some blog content', 'bob jones', 'Mar. 6')
+//BlogPost.create('this is a title', 'this is some blog content', 'bob jones', 'Mar. 6')
 
 router.get('/', (req, res) => {
-    res.send(BlogPosts.get())
+  console.log('step 1')  
+  BlogPost
+      .find().exec()
+      .then(post => {
+        console.log('step 2')
+        res.json(post)
+      })
+      .catch(err => {
+        console.error(err)
+        res.status(500).json({message: "server error"})
+      })
 })
 
 router.post('/', jsonParser, (req,res) => {
@@ -20,12 +30,12 @@ router.post('/', jsonParser, (req,res) => {
         return res.status(400).send(message);
       }
     }
-    let storeBlogPost = BlogPosts.create(req.body.title, req.body.content, req.body.author, req.body.publishDate)
+    let storeBlogPost = BlogPost.create(req.body.title, req.body.content, req.body.author, req.body.publishDate)
     res.status(201).json(storeBlogPost)
 })
 
 router.delete('/:id', (req,res) => {
-    BlogPosts.delete(req.params.id);
+    BlogPost.delete(req.params.id);
     res.status(204).end();
 })
 
@@ -45,7 +55,7 @@ router.put('/:id', jsonParser, (req,res) => {
     return res.status(400).send(message);
   }
   console.log(`Updating blog \`${req.params.id}\``);
-  const updatedBlogPosts = BlogPosts.update({
+  const updatedBlogPosts = BlogPost.update({
     id: req.params.id,
     title: req.body.title,
     content: req.body.content,
