@@ -30,18 +30,54 @@ router.post('/', jsonParser, (req,res) => {
         return res.status(400).send(message);
       }
     }
-    let storeBlogPost = BlogPost.create(req.body.title, req.body.content, req.body.author, req.body.publishDate)
-    res.status(201).json(storeBlogPost)
+    BlogPost
+      .create({
+        title: req.body.title, 
+        content: req.body.content, 
+        author: req.body.author,
+        publishDate: req.body.publishDate || Date.now()
+      })
+      .then(post => res.status(201).json(post.serialize()))
+      .catch(err => {
+        console.error(err)
+        res.status(500).json({message: 'server error'})
+      })
+    
 })
 
 router.delete('/:id', (req,res) => {
-    BlogPost.delete(req.params.id);
-    res.status(204).end();
+  BlogPost
+    .findByIdAndRemove(req.params.id)
+    .then(() => {
+      res.status(204).json({message: "success"})
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).json({error: "delete error"})
+    })    
+  
 })
 
 router.put('/:id', jsonParser, (req,res) => {
-  const requiredFields = ['id', 'title', 'content', 'author', 'publishDate'];
-  for (let i=0; i<requiredFields.length; i++) {
+  if(!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+    res.status(400).json({
+      error: "Request path id and request body id values must match"
+    })
+  }
+  
+  const updated = {};
+  const updateableFields = ['title', 'content', 'author'];
+  updateableFields.forEach(field => {
+    if (field in req.body) {
+      updated[field] = req.body[field];
+    }
+  })
+  
+  BlogPost
+    .findByIdAndUpdate(req.params.id, { $set: updated }, { new: true})
+    .then(updatedPost => res.status(204).end())
+    .catch(err => res.status(500).json({message: "update error"}))
+  /* for (let i=0; i<requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
       const message = `Missing \`${field}\` in request body`
@@ -62,7 +98,7 @@ router.put('/:id', jsonParser, (req,res) => {
     author: req.body.author,
     publishDate: req.body.publishDate    
 })
-  res.status(200).json(updatedBlogPosts)
+  res.status(200).json(updatedBlogPosts)*/
 })
 
 module.exports = router;
