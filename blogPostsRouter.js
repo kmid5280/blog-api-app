@@ -21,6 +21,7 @@ router.get('/', (req, res) => {
 })
 
 router.post('/', jsonParser, (req,res) => {
+    console.log(req.body)
     const requiredFields = ['title', 'content', 'author'];
     for (let i=0; i<requiredFields.length; i++) {
       const field = requiredFields[i];
@@ -49,7 +50,7 @@ router.delete('/:id', (req,res) => {
   BlogPost
     .findByIdAndRemove(req.params.id)
     .then(() => {
-      res.status(204).json({message: "success"})
+      res.status(200).json({message: "success"})
     })
     .catch(err => {
       console.error(err);
@@ -75,30 +76,9 @@ router.put('/:id', jsonParser, (req,res) => {
   
   BlogPost
     .findByIdAndUpdate(req.params.id, { $set: updated }, { new: true})
-    .then(updatedPost => res.status(204).end())
+    .then(updatedPost => res.status(200).json(updatedPost))
     .catch(err => res.status(500).json({message: "update error"}))
-  /* for (let i=0; i<requiredFields.length; i++) {
-    const field = requiredFields[i];
-    if (!(field in req.body)) {
-      const message = `Missing \`${field}\` in request body`
-      console.error(message);
-      return res.status(400).send(message);
-    }
-  }
-  if (req.params.id !== req.body.id) {
-    const message = `Request path id (${req.params.id}) and request body id (${req.body.id}) must match`;
-    console.error(message);
-    return res.status(400).send(message);
-  }
-  console.log(`Updating blog \`${req.params.id}\``);
-  const updatedBlogPosts = BlogPost.update({
-    id: req.params.id,
-    title: req.body.title,
-    content: req.body.content,
-    author: req.body.author,
-    publishDate: req.body.publishDate    
-})
-  res.status(200).json(updatedBlogPosts)*/
+  
 })
 
 module.exports = router;
