@@ -11,89 +11,7 @@ app.use(morgan('common'));
 
 app.use(express.static('public'))
 app.use('/blog-posts', blogPostsRouter)
-
-/* app.get('/blog-posts', (req, res) => {
-  BlogPost
-    .find()
-    .then(blogposts => {
-      res.json({
-        blogposts: blogposts.map(
-          (postItem) => postItem.serialize())
-      })
-    })
-    .catch(
-      err => {
-        console.error(err);
-        res.status(500).json({message: 'internal server error'});
-      }
-    )
-})
-
-app.get('/blog-posts/:id', (req, res) => {
-  BlogPost
-    .findById(req.params.id)
-    .then(blogposts => res.json(blogposts.serialize()))
-    .catch(err => {
-      console.error(err);
-        res.status(500).json({message: 'Internal server error'})
-    });
-});
-
-app.post('/blog-posts', (req, res) => {
-  const requiredFields = ['title', 'content', 'author'/*: {'firstname', 'lastname'} ];
-  for (let i=0; i<requiredFields.length; i++) {
-    
-    if (!(field in req.body)) {
-      const message = `Missing \`${field}\` in request body`
-      console.error(message);
-      return res.status(400).send(message);
-    }
-  }
-  BlogPost
-    .create({
-      title: req.body.title,
-      content: req.body.content,
-      author: req.body.author //how to specify required first and last name??
-    })
-    .then(
-      blogposts => res.status(201).json(blogposts.serialize()))
-    .catch(err => {
-      console.error(err);
-      res.status(500).json({message: 'internal server error'})
-    })
-})
-
-app.put('/blogposts/:id', (req, res) => {
-  if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
-    const message = (
-      `Request path id (${req.params.id}) and request body id ` +
-      `(${req.body.id}) must match`);
-      console.error(message);
-      return res.status(400).json({message: message});
-    }
-
-    const toUpdate = {};
-    const updateableFields = ['title', 'content', 'author'];
-    updateableFields.forEach(field => {
-      if (field in req.body) {
-        toUpdate[field] = req.body[field];
-      }
-    })
-
-    BlogPost
-      .findByIdAndUpdate(req.params.id, {$set: toUpdate})
-      .then(blogposts => res.status(204).end())
-      .catch(err => res.status(500).json({message: 'internal server error'}))
-    
-  })
-
-
-app.delete('/blog-posts/:id', (req, res) => {
-  BlogPost
-  .findByIdAndRemove(req.params.id)
-  .then(() => res.status(204).end())
-  .catch(err => res.status(500).json({message: 'internal server error'}))
-})*/
+//app.use('/blog-posts', addTests.js)
 
 app.use('*', function (req, res) {
   res.status(404).json({message: 'not found' })
@@ -101,34 +19,38 @@ app.use('*', function (req, res) {
 
 let server;
 
-// this function starts our server and returns a Promise.
-// In our test code, we need a way of asynchronously starting
-// our server, since we'll be dealing with promises there.
-function runServer() {
-  const port = process.env.PORT || 8080;
+// this function connects to our database, then starts the server
+function runServer(databaseUrl, port = PORT) {
+
   return new Promise((resolve, reject) => {
-    server = app.listen(port, () => {
-      console.log(`Your app is listening on port ${port}`);
-      resolve(server);
-    }).on('error', err => {
-      reject(err)
+    mongoose.connect(databaseUrl, err => {
+      if (err) {
+        return reject(err);
+      }
+      server = app.listen(port, () => {
+        console.log(`Your app is listening on port ${port}`);
+        resolve();
+      })
+        .on('error', err => {
+          mongoose.disconnect();
+          reject(err);
+        });
     });
   });
 }
 
-// like `runServer`, this function also needs to return a promise.
-// `server.close` does not return a promise on its own, so we manually
-// create one.
+// this function closes the server, and returns a promise. we'll
+// use it in our integration tests later.
 function closeServer() {
-  return new Promise((resolve, reject) => {
-    console.log('Closing server');
-    server.close(err => {
-      if (err) {
-        reject(err);
-        // so we don't also call `resolve()`
-        return;
-      }
-      resolve();
+  return mongoose.disconnect().then(() => {
+    return new Promise((resolve, reject) => {
+      console.log('Closing server');
+      server.close(err => {
+        if (err) {
+          return reject(err);
+        }
+        resolve();
+      });
     });
   });
 }

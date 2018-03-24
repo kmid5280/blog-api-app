@@ -136,7 +136,7 @@ describe('POST endpoint', function () {
     })
 })
 
-describe('PUT endpoint' function() {
+describe('PUT endpoint', function() {
     it('should update fields you send over', function() {
         const updateData = {
             title: 'new updated title',
@@ -148,7 +148,7 @@ describe('PUT endpoint' function() {
             .then(function(post) {
                 updateData.id = post.id;
                 return chai.request(app)
-                    .put(`/blogposts/${post.id}`)
+                    .put(`/blog-posts/${post.id}`)
                     .send(updateData);
             })
             .then(function(res) {
