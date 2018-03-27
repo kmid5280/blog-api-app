@@ -21,6 +21,7 @@ router.get('/', (req, res) => {
 })
 
 router.post('/', jsonParser, (req,res) => {
+    console.log(req.body)
     const requiredFields = ['title', 'content', 'author'];
     for (let i=0; i<requiredFields.length; i++) {
       const field = requiredFields[i];
@@ -49,7 +50,7 @@ router.delete('/:id', (req,res) => {
   BlogPost
     .findByIdAndRemove(req.params.id)
     .then(() => {
-      res.status(204).json({message: "success"})
+      res.status(200).json({message: "success"})
     })
     .catch(err => {
       console.error(err);
@@ -75,7 +76,7 @@ router.put('/:id', jsonParser, (req,res) => {
   
   BlogPost
     .findByIdAndUpdate(req.params.id, { $set: updated }, { new: true})
-    .then(updatedPost => res.status(204).end())
+    .then(updatedPost => res.status(200).json(updatedPost))
     .catch(err => res.status(500).json({message: "update error"}))
   
 })

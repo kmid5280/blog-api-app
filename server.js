@@ -21,7 +21,7 @@ let server;
 
 // this function connects to our database, then starts the server
 function runServer(databaseUrl, port = PORT) {
-
+  console.log(databaseUrl)
   return new Promise((resolve, reject) => {
     mongoose.connect(databaseUrl, err => {
       if (err) {

@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 
 const expect = chai.expect;
 const {BlogPost} = require('../models');
-const {app, runServer, closeServer} = require ('../server');
+const {app, runServer, closeServer} = require('../server');
 const {TEST_DATABASE_URL} = require('../config');
 
 chai.use(chaiHttp);
@@ -32,10 +32,10 @@ function generateAuthor() {
 
 function generateContent() {
     const contentTypes = ['this is some content', 'this is interesting content', 'here is a unique blog entry'];
-    return contentTypes = [Math.floor(Math.random() * contentTypes.length)]
+    return contentTypes[Math.floor(Math.random() * contentTypes.length)]
 }
 
-function generateBlogData() {
+function generateBlogPostData() {
     return {
         title: generateTitle(),
         content: generateContent(),
@@ -49,7 +49,12 @@ function tearDownDb() {
 }
 
 describe ('Blog Posts API resource', function() {
+    
+})
+
+describe('Blog post module', function() {
     before(function() {
+        console.log(TEST_DATABASE_URL)
         return runServer(TEST_DATABASE_URL);
     })
 
@@ -64,9 +69,6 @@ describe ('Blog Posts API resource', function() {
     after(function() {
         return closeServer();
     })
-})
-
-describe('GET endpoint', function() {
     it('should return all blog posts', function() {
         let res;
         return chai.request(app)
@@ -74,11 +76,11 @@ describe('GET endpoint', function() {
             .then(function(_res) {
                 res = _res;
                 expect(res).to.have.status(200);
-                expect(res.body.blogposts).to.have.length.of.at.least(1);
+                expect(res.body).to.have.lengthOf.at.least(1);
                 return BlogPost.count();
             })
             .then(function(count) {
-                expect(res.body.blogposts).to.have.length.of(count);
+                expect(res.body).to.have.lengthOf(count);
             })
             
     })
@@ -87,35 +89,34 @@ describe('GET endpoint', function() {
 
         let resBlogPost;
         return chai.request(app)
-            .get('/blogposts')
+            .get('/blog-posts')
             .then(function(res) {
                 expect(res).to.have.status(200);
                 expect(res).to.be.json;
-                expect(res.body.blogposts).to.be.a('array');
-                expect(res.body.blogposts).to.have.length.of.at.least(1);
-                res.body.blogpsts.forEach(function(post) {
+                expect(res.body).to.be.a('array');
+                expect(res.body).to.have.lengthOf.at.least(1);
+                res.body.forEach(function(post) {
                     expect(post).to.be.a('object');
                     expect(post).to.include.keys(
                         'title', 'content', 'author');
                 })
-                resBlogPost = res.body.blogposts[0];
-                return BlogPost.findById(resBlogPost.id);
+                resBlogPost = res.body[0];
+                return BlogPost.findById(resBlogPost._id);
             })
             .then(function(post) {
-                expect(resBlogPost.id).to.equal(post.id);
+                console.log(resBlogPost._id, post.id)
+                expect(resBlogPost._id).to.equal(post.id);
                 expect(resBlogPost.title).to.equal(post.title);
                 expect(resBlogPost.content).to.equal(post.content);
                 expect(resBlogPost.author).to.equal(post.author);
             })
-    } )
-})
-
-describe('POST endpoint', function () {
+    })
+    
     it('should add a new blog post', function() {
         const newBlogPost = generateBlogPostData();
         
         return chai.request(app)
-            .post('/blogposts')
+            .post('/blog-posts')
             .send(newBlogPost)
             .then(function(res) {
                 expect(res).to.have.status(201);
@@ -134,16 +135,13 @@ describe('POST endpoint', function () {
                 expect(post.author).to.equal(newBlogPost.author)
             })
     })
-})
-
-describe('PUT endpoint', function() {
     it('should update fields you send over', function() {
         const updateData = {
             title: 'new updated title',
             content: 'newly updated content'
         }
 
-        return Restaurant
+        return BlogPost
             .findOne()
             .then(function(post) {
                 updateData.id = post.id;
@@ -152,7 +150,7 @@ describe('PUT endpoint', function() {
                     .send(updateData);
             })
             .then(function(res) {
-                expect(res).to.have.status(204);
+                expect(res).to.have.status(200);
                 return BlogPost.findById(updateData.id)
             })
             .then(function(post) {
@@ -161,11 +159,20 @@ describe('PUT endpoint', function() {
                 expect(post.author).to.equal(post.author)
             })
     })
-})
-
-describe('DELETE endpoint', function() {
     it('should delete a post by id', function() {
         let post;
         return BlogPost
     })
+})
+
+describe('POST endpoint', function () {
+    
+})
+
+describe('PUT endpoint', function() {
+    
+})
+
+describe('DELETE endpoint', function() {
+    
 })
