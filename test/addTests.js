@@ -27,7 +27,7 @@ function generateTitle() {
 
 function generateAuthor() {
     const author = ['Bob Smith', 'Jane Doe', 'Tom Jones'];
-    return author[Math.floor(Math.random() * authors.length)];
+    return author[Math.floor(Math.random() * author.length)];
 }
 
 function generateContent() {
